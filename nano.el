@@ -15,12 +15,15 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses/>.
 ;; ---------------------------------------------------------------------
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
+;; (package-refresh-contents)
 
 
 ;; Path to nano emacs modules (mandatory)
-(add-to-list 'load-path "/Users/rougier/Documents/GitHub/nano-emacs")
-(add-to-list 'load-path ".")
+(add-to-list 'load-path "~/.config/emacs/nano-emacs/")
+;; (add-to-list 'load-path ".")
 
 ;; Default layout (optional)
 (require 'nano-layout)
@@ -74,7 +77,7 @@
 ;; Compact layout (need to be loaded after nano-modeline)
 (when (member "-compact" command-line-args)
   (require 'nano-compact))
-  
+
 ;; Nano counsel configuration (optional)
 ;; Needs "counsel" package to be installed (M-x: package-install)
 ;; (require 'nano-counsel)
@@ -91,5 +94,39 @@
 ;; Help (optional)
 (unless (member "-no-help" command-line-args)
   (require 'nano-help))
+
+;;; Custom Changes
+(add-to-list 'default-frame-alist '(menu-bar-lines . 0))   ; disalbe the menu bar
+
+(define-key global-map (kbd "C-c m") #'menu-bar-mode) ; toggle menu bar
+
+(use-package quelpa
+  :ensure t)
+
+(use-package evil
+  :ensure t
+  :init
+  (setq evil-want-keybinding nil) ;; required by evil-collection
+  :custom
+  (evil-shift-width 2)
+  (evil-want-find-undo t) ;; insert mode undo steps as per emacs
+  (evil-undo-system 'undo-redo) ;; use native commands in emacs 28
+  (evil-symbol-word-search t)		; */# search the symbol under the cursor instead of the word
+  :config
+  (evil-mode 1))
+
+(use-package evil-collection
+  :ensure t
+  :after evil
+  :custom (evil-collection-setup-minibuffer t)
+  :init (evil-collection-init))
+
+(use-package no-littering
+  :ensure t
+  :config
+  ;; no-littering doesn't set this by default so we must place
+  ;; auto save files in the same path as it uses for sessions
+  (setq auto-save-file-name-transforms
+        `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 
 (provide 'nano)
